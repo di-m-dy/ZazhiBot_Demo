@@ -17,7 +17,7 @@ def is_admin(func):
     ru: Проверить, является ли пользователь администратором
     """
     async def wrapper(message: Message):
-        if message.from_user.id == ADMIN_ID:
+        if message.from_user.id == int(ADMIN_ID):
             await func(message)
         else:
             await message.answer('You are not a admin!')
