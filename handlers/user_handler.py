@@ -166,9 +166,9 @@ async def play_handler(message: Message, state: FSMContext):
     # ru: Установить список для перемешивания ответов
     variant_answers = [
         random_data['correct'],
-        random_data['uncorrect_1'],
-        random_data['uncorrect_2'],
-        random_data['uncorrect_3']
+        random_data['incorrect_1'],
+        random_data['incorrect_2'],
+        random_data['incorrect_3']
     ]
     # en: Mix the answers
     # ru: Перемешать ответы
