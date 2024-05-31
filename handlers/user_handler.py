@@ -114,23 +114,6 @@ async def help_handler(message: Message):
 # en: Handlers for text messages
 # ru: Обработчики для текстовых сообщений
 
-@router.message(F.text.func(lambda text: any(word in text.lower() for word in phrases.HELLO)))
-async def hello_handler(message: Message):
-    """
-    en: Hello message
-    ru: Приветственное сообщение
-    """
-    await message.answer('en: Hello!\nru: Привет!')
-
-
-@router.message(F.text.func(lambda text: any(word in text.lower() for word in phrases.HATE)))
-async def hate_handler(message: Message):
-    """
-    en: The word that cannot be pronounced
-    ru: Слово, которое нельзя произносить
-    """
-    await message.answer(bot_messages.HATE)
-
 
 @router.message(F.text.func(lambda text: any(word in text.lower() for word in phrases.DREAM)))
 async def dream_handler(message: Message):
@@ -389,6 +372,24 @@ async def set_message_handler(message: Message):
             '<pre>write_to_bot: my message: [your text]</pre>',
             parse_mode='HTML'
         )
+
+
+@router.message(F.text.func(lambda text: any(word in text.lower() for word in phrases.HELLO)))
+async def hello_handler(message: Message):
+    """
+    en: Hello message
+    ru: Приветственное сообщение
+    """
+    await message.answer('en: Hello!\nru: Привет!')
+
+
+@router.message(F.text.func(lambda text: any(word in text.lower() for word in phrases.HATE)))
+async def hate_handler(message: Message):
+    """
+    en: The word that cannot be pronounced
+    ru: Слово, которое нельзя произносить
+    """
+    await message.answer(bot_messages.HATE)
 
 
 @router.message(F.text)
