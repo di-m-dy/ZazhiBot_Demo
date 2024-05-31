@@ -363,7 +363,7 @@ async def set_message_handler(message: Message):
     # ru: Если пользователь правильно ввел сообщение, сохранить его в базу данных
     if message_text:
         db.insert_into_db('users_messages', temp_dict)
-        await message.answer('en: Спасибо, что оставил сообщение!\n\nru: Спасибо, что оставил сообщение!')
+        await message.answer('ru: Спасибо, что оставил сообщение!\n\nen: Thank you for leaving a message!')
     else:
         await message.answer(
             'ru: Пожалуйста, введите сообщение в формате'
