@@ -29,9 +29,9 @@ FRAME_QUIZ_TABLE = {
         'question_file_id TEXT',
         'answer_file_id TEXT',
         'correct TEXT',
-        'uncorrect_1 TEXT',
-        'uncorrect_2 TEXT',
-        'uncorrect_3 TEXT',
+        'incorrect_1 TEXT',
+        'incorrect_2 TEXT',
+        'incorrect_3 TEXT',
     ]
 }
 # en: The table of the phrases sorted by theme/ ru: Таблица фраз, отсортированных по темам
