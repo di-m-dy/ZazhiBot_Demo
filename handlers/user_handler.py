@@ -16,14 +16,14 @@ import phrases
 import bot_messages
 import db
 
-
+# en: Create a router / ru: Создать роутер
 router = Router()
-
 
 # en: Handlers for /commands
 # ru: Обработчики для /команд
 
-#
+
+# en: Create a state for the quiz / ru: Создать состояние для викторины
 class FrameQuiz(StatesGroup):
     quiz = State()
 
@@ -108,6 +108,7 @@ async def help_handler(message: Message):
             'id',
             help_data['id']
         )
+    await message.answer(bot_messages.HELP_EN, parse_mode='HTML')
 
 
 # en: Handlers for text messages
@@ -192,7 +193,10 @@ async def play_handler(message: Message, state: FSMContext):
     # en: Try to send the image by file_id
     # ru: Попробовать отправить изображение по file_id
     try:
-        await message.answer_photo(photo=random_data['question_file_id'], caption='Отгадай фильм или картину!')
+        await message.answer_photo(
+            photo=random_data['question_file_id'],
+            caption='ru: Отгадай фильм или картину! / en: Guess the movie or picture!'
+        )
     # en: If the file_id is not found, send the image by path and save the file_id to the database
     # ru: Если file_id не найден, отправить изображение по пути и сохранить file_id в базу данных
     except Exception as e:
@@ -200,7 +204,9 @@ async def play_handler(message: Message, state: FSMContext):
         await message.bot.send_message(config.ADMIN_ID, f'Error: {e}')
         img_path = os.path.join(config.PROJECT_PATH, random_data['question_img'])
         question_img = FSInputFile(str(img_path))
-        send_photo = await message.answer_photo(photo=question_img, caption='Отгадай фильм или картину!')
+        send_photo = await message.answer_photo(
+            photo=question_img,
+            caption='ru: Отгадай фильм или картину! / en: Guess the movie or picture!')
         db.update_value(
             'frame_quiz',
             'question_file_id',
@@ -208,21 +214,21 @@ async def play_handler(message: Message, state: FSMContext):
             'id',
             random_data['id']
         )
-    # en: save the data to the state
-    # ru: сохранить данные в состояние
-    # await state.update_data(quiz=random_data['id'])
 
     # en: create a poll
     # ru: создать опрос
     send_poll = await message.answer_poll(
-        question='Выберите правильный ответ',
+        question='ru: Выберите правильный ответ / en: Choose the correct answer',
         options=mix_data,
         correct_option_id=mix_data.index(random_data['correct']),
         type='quiz',
         is_anonymous=False,
-        explanation=f'Правильный ответ: {random_data["correct"]}',
+        explanation=f'ru: Правильный ответ / en: The correct answer:\n{random_data["correct"]}',
         reply_markup=None
     )
+
+    # en: Save the poll id and the correct answer id to the state
+    # ru: Сохранить id опроса и id правильного ответа в состояние
     data = await state.get_data()
     data[send_poll.poll.id] = random_data['id']
     await state.update_data(data)
@@ -234,8 +240,7 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     en: Poll answer handler
     ru: Обработчик ответа на опрос
     """
-    """data = await state.get_data()
-    print(data.get(poll_answer.poll_id))"""
+
     # en: Try to send the answer image by file_id
     # ru: Попробовать отправить изображение ответа по file_id
     data = await state.get_data()
@@ -247,7 +252,8 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
         await poll_answer.bot.send_photo(
             chat_id=poll_answer.user.id,
             photo=file_id,
-            caption='Было загадано это изображение!'
+            caption='ru: Было загадано это изображение!\n\n'
+                    'en: This image was guessed!'
         )
     # en: If the file_id is not found, send the image by path and save the file_id to the database
     # ru: Если file_id не найден, отправить изображение по пути и сохранить file_id в базу данных
@@ -262,7 +268,8 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
         send_photo = await poll_answer.bot.send_photo(
             chat_id=poll_answer.user.id,
             photo=answer_img,
-            caption='Было загадано это изображение!'
+            caption='ru: Было загадано это изображение!\n\n'
+                    'en: This image was guessed!'
         )
         db.update_value(
             'frame_quiz',
@@ -272,6 +279,8 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
             answer_id
         )
 
+    # en: Delete the poll id from the state
+    # ru: Удалить id опроса из состояния
     data.pop(poll_answer.poll_id)
     await state.clear()
     await state.update_data(data)
@@ -323,12 +332,14 @@ async def good_news_handler(message: Message):
     if data:
         good_news = random.choice(data)['news']
     else:
-        good_news = ('Еще никто не делился хорошими новостями. Поделись первым!\n'
-                     '```пиши_боту: моя хорошая новость: <текст>```')
-    await message.answer(good_news, parse_mode='Markdown')
+        good_news = ('ru: Еще никто не делился хорошими новостями. Поделись первым!\n'
+                     '<pre>пиши_боту: моя хорошая новость: <текст></pre>\n\n'
+                     'en: No one has shared good news yet. Be the first to share!\n'
+                     '<pre>write_to_bot: my good news: <text></pre>')
+    await message.answer(good_news, parse_mode='HTML')
 
 
-@router.message(F.text.lower().startswith(phrases.SET_GOOD_NEWS))
+@router.message(F.text.func(lambda text: any(text.lower().startswith(word.lower()) for word in phrases.SET_GOOD_NEWS)))
 async def set_good_news_handler(message: Message):
     """
     en: Set good news message
@@ -339,10 +350,16 @@ async def set_good_news_handler(message: Message):
     # ru: Если пользователь правильно ввел новость, сохранить ее в базу данных
     if good_news:
         db.insert_into_db('good_news', {'news': good_news.capitalize()})
-        await message.answer('Спасибо, что поделился хорошей новостью!')
+        await message.answer('ru: Спасибо, что поделился хорошей новостью!'
+                             '\n\nen: Thank you for sharing the good news!')
     else:
-        await message.answer('Пожалуйста, введите хорошую новость в формате '
-                             '<pre>пиши_боту: моя хорошая новость: [ваш текст]</pre>', parse_mode='HTML')
+        await message.answer(
+            'ru: Пожалуйста, введите хорошую новость в формате'
+            '<pre>пиши_боту: моя хорошая новость: [ваш текст]</pre>'
+            'en: Please, enter the good news in the format'
+            '<pre>write_to_bot: my good news: [your text]</pre>',
+            parse_mode='HTML'
+        )
 
 
 @router.message(F.text.func(lambda text: any(text.lower().startswith(word.lower()) for word in phrases.SET_MESSAGE)))
@@ -363,10 +380,15 @@ async def set_message_handler(message: Message):
     # ru: Если пользователь правильно ввел сообщение, сохранить его в базу данных
     if message_text:
         db.insert_into_db('users_messages', temp_dict)
-        await message.answer('Спасибо, что оставил сообщение!')
+        await message.answer('en: Спасибо, что оставил сообщение!\n\nru: Спасибо, что оставил сообщение!')
     else:
-        await message.answer('Пожалуйста, введите сообщение в формате '
-                             '<pre>пиши_боту: мое послание: [ваш текст]</pre>', parse_mode='HTML')
+        await message.answer(
+            'ru: Пожалуйста, введите сообщение в формате'
+            '<pre>пиши_боту: мое послание: [ваш текст]</pre>\n\n'
+            'en: Please, enter the message in the format'
+            '<pre>write_to_bot: my message: [your text]</pre>',
+            parse_mode='HTML'
+        )
 
 
 @router.message(F.text)

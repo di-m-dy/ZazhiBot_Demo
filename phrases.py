@@ -31,17 +31,12 @@ PLAY = {
     'сыграем',
     'играем',
     'играть',
-    'поиграть'
+    'поиграть',
+    'how about to play',
+    'play with me',
+    'play'
 }
 
-# en: Phrases to ask for help / ru: Фразы для запроса помощи
-HELP = {
-    'помощь',
-    'help',
-    'help me',
-    'помоги',
-    'помогите'
-}
 
 # en: Phrases to conversation about the dream / ru: Фразы для разговора о снах
 DREAM = {
@@ -70,6 +65,13 @@ DREAM = {
     'приснятся',
     'приснился',
     'приснилась',
+    'dream',
+    'dreams',
+    'dreaming',
+    'dreamed',
+    'dreamt',
+    'nightmare',
+    'nightmares'
 }
 
 # en: Phrases to conversation about the time / ru: Фразы для разговора о времени
@@ -92,6 +94,12 @@ TIME = {
     'временном',
     'временная',
     'временную',
+    'time',
+    'times',
+    'timing',
+    'temporal',
+    'temporally',
+    'temporality'
 }
 
 # en: Phrases to get good news / ru: Фразы для получения хороших новостей
@@ -100,11 +108,17 @@ GET_GOOD_NEWS = {
     'скажи хорошую новость',
     'напиши хорошую новость',
     'поделись хорошей новостью',
-    'у тебя есть хорошие новости'
+    'у тебя есть хорошие новости',
+    'tell me good news',
+    'say good news',
+    'write good news'
 }
 
 # en: Phrases to set good news / ru: Фразы для установки хороших новостей
-SET_GOOD_NEWS = 'моя хорошая новость:'
+SET_GOOD_NEWS = {
+    'моя хорошая новость:',
+    'my good news:'
+}
 
 # en: Phrases to get the tale about Piter Pen / ru: Фразы для получения сказки о Питере Пэне
 PITER_PAN = {
@@ -112,6 +126,10 @@ PITER_PAN = {
     'питер пен',
     'питерпен',
     'питерпэн',
+    'piter pen',
+    'piterpan',
+    'piterpen',
+    'peter pan'
 }
 
 # en: Phrases to set the message / ru: Фразы для установки сообщения
@@ -119,5 +137,6 @@ SET_MESSAGE = {
     'мое послание:',
     'мое сообщение:',
     'моё послание:',
-    'моё сообщение:'
+    'моё сообщение:',
+    'my message:'
 }
