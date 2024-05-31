@@ -1,0 +1,16 @@
+.idea/
+.venv/
+.env
+*.pyc
+*.pyo
+test/
+tests/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.bak
+*.tmp
+
+db/zazhibot.db
