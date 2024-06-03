@@ -50,18 +50,22 @@ async def start_handler(message: Message):
             }
             db.insert_into_db('users', tmp_dict)
 
-    header_data = db.get_data_from_db(config.BOT_IMG_TABLE, 'name', 'header_animation')[-1]
+    header_data = db.get_data_from_db(config.BOT_IMG_TABLE, 'name', 'header_animation')
+    if not header_data:
+        await message.answer(bot_messages.START, parse_mode='HTML')
+        return
     # en: Try to send the animation by file_id
     # ru: Попробовать отправить анимацию по file_id
     try:
-        file_id = header_data['file_id']
+        file_id = header_data[-1]['file_id']
         await message.answer_animation(animation=file_id, caption=bot_messages.START, parse_mode='HTML')
     # en: If the file_id is not found, send the animation by path and save the file_id to the database
     # ru: Если file_id не найден, отправить анимацию по пути и сохранить file_id в базу данных
     except Exception as e:
-        print(e)
-        await message.bot.send_message(config.ADMIN_ID, f'Error with "{header_data['name']}": {e}')
-        img_path = os.path.join(config.PROJECT_PATH, header_data['file_path'])
+        # en: Send a message to the admin about the error
+        # ru: Отправить сообщение администратору об ошибке
+        await message.bot.send_message(config.ADMIN_ID, f'Error with «{header_data[-1]["name"]}»:\n{e}')
+        img_path = os.path.join(config.PROJECT_PATH, header_data[-1]['file_path'])
         animation = FSInputFile(str(img_path))
         send_animation = await message.answer_animation(
             animation=animation,
@@ -73,7 +77,7 @@ async def start_handler(message: Message):
             'file_id',
             send_animation.video.file_id,
             'id',
-            header_data['id']
+            header_data[-1]['id']
         )
 
 
@@ -83,18 +87,23 @@ async def help_handler(message: Message):
     en: Instructions for commands
     ru: Справка по командам
     """
-    help_data = db.get_data_from_db(config.BOT_IMG_TABLE, 'name', 'help')[-1]
+    help_data = db.get_data_from_db(config.BOT_IMG_TABLE, 'name', 'help')
+    if not help_data:
+        await message.answer(bot_messages.HELP, parse_mode='HTML')
+        await message.answer(bot_messages.HELP_EN, parse_mode='HTML')
+        return
     # en: Try to send the animation by file_id
     # ru: Попробовать отправить анимацию по file_id
     try:
-        file_id = help_data['file_id']
+        file_id = help_data[-1]['file_id']
         await message.answer_photo(photo=file_id, caption=bot_messages.HELP, parse_mode='HTML')
     # en: If the file_id is not found, send the animation by path and save the file_id to the database
     # ru: Если file_id не найден, отправить анимацию по пути и сохранить file_id в базу данных
     except Exception as e:
-        print(e)
-        await message.bot.send_message(config.ADMIN_ID, f'Error with "{help_data['name']}": {e}')
-        img_path = os.path.join(config.PROJECT_PATH, help_data['file_path'])
+        # en: Send a message to the admin about the error
+        # ru: Отправить сообщение администратору об ошибке
+        await message.bot.send_message(config.ADMIN_ID, f'Error with «{help_data[-1]["name"]}»:\n{e}')
+        img_path = os.path.join(config.PROJECT_PATH, help_data[-1]['file_path'])
         animation = FSInputFile(str(img_path))
         send_photo = await message.answer_photo(
             photo=animation,
@@ -106,7 +115,7 @@ async def help_handler(message: Message):
             'file_id',
             send_photo.photo[-1].file_id,
             'id',
-            help_data['id']
+            help_data[-1]['id']
         )
     await message.answer(bot_messages.HELP_EN, parse_mode='HTML')
 
@@ -153,15 +162,15 @@ async def play_handler(message: Message, state: FSMContext):
     en: Play message: get a random image from the database and create a poll
     ru: Сообщение о игре: получить случайное изображение из базы данных и создать опрос
     """
-    data = db.get_data_from_db(config.FRAME_QUIZ_TABLE)
-    if not data:
+    quiz_data = db.get_data_from_db(config.FRAME_QUIZ_TABLE)
+    if not quiz_data:
         # en: If the database is empty, send a message
         # ru: Если база данных пуста, отправить сообщение
         await message.answer(bot_messages.EMPTY_DB)
         return
     # en: Get a random image from the database
     # ru: Получить случайное изображение из базы данных
-    random_data = random.choice(data)
+    random_data = random.choice(quiz_data)
     # en: Set list for mix the answers
     # ru: Установить список для перемешивания ответов
     variant_answers = [
@@ -183,8 +192,9 @@ async def play_handler(message: Message, state: FSMContext):
     # en: If the file_id is not found, send the image by path and save the file_id to the database
     # ru: Если file_id не найден, отправить изображение по пути и сохранить file_id в базу данных
     except Exception as e:
-        print(e)
-        await message.bot.send_message(config.ADMIN_ID, f'Error: {e}')
+        # en: Send a message to the admin about the error
+        # ru: Отправить сообщение администратору об ошибке
+        await message.bot.send_message(config.ADMIN_ID, f'Error with «{random_data["question_img"]}»:\n{e}')
         img_path = os.path.join(config.PROJECT_PATH, random_data['question_img'])
         question_img = FSInputFile(str(img_path))
         send_photo = await message.answer_photo(
@@ -230,8 +240,14 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     answer_id = data.get(poll_answer.poll_id)
     if not answer_id:
         return
+    answer_data = db.get_data_from_db(config.FRAME_QUIZ_TABLE, 'id', answer_id)
+    if not answer_data:
+        await poll_answer.bot.send_message(poll_answer.user.id, bot_messages.EMPTY_DB)
+        return
+    file_id = answer_data[-1]['answer_file_id']
+    # en: Try to send the image by file_id
+    # ru: Попробовать отправить изображение по file_id
     try:
-        file_id = db.get_data_from_db(config.FRAME_QUIZ_TABLE, 'id', answer_id)[-1]['answer_file_id']
         await poll_answer.bot.send_photo(
             chat_id=poll_answer.user.id,
             photo=file_id,
@@ -241,11 +257,12 @@ async def poll_answer_handler(poll_answer: types.PollAnswer, state: FSMContext):
     # en: If the file_id is not found, send the image by path and save the file_id to the database
     # ru: Если file_id не найден, отправить изображение по пути и сохранить file_id в базу данных
     except Exception as e:
-        print(e)
-        await poll_answer.bot.send_message(config.ADMIN_ID, f'Error: {e}')
+        # en: Send a message to the admin about the error
+        # ru: Отправить сообщение администратору об ошибке
+        await poll_answer.bot.send_message(config.ADMIN_ID, f'Error with «{answer_data[-1]["answer_img"]}»:\n{e}')
         img_path = os.path.join(
             config.PROJECT_PATH,
-            db.get_data_from_db(config.FRAME_QUIZ_TABLE, 'id', answer_id)[-1]['answer_img']
+            answer_data[-1]["answer_img"]
         )
         answer_img = FSInputFile(str(img_path))
         send_photo = await poll_answer.bot.send_photo(
@@ -292,8 +309,9 @@ async def peter_pan_handler(message: Message):
     # en: If the file_id is not found, send the audio by path and save the file_id to the database
     # ru: Если file_id не найден, отправить аудио по пути и сохранить file_id в базу данных
     except Exception as e:
-        print(e)
-        await message.bot.send_message(config.ADMIN_ID, f'Error: {e}')
+        # en: Send a message to the admin about the error
+        # ru: Отправить сообщение администратору об ошибке
+        await message.bot.send_message(config.ADMIN_ID, f'Error with «{random_data["answer_img"]}»:\n{e}')
         file_path = os.path.join(config.PROJECT_PATH, random_data['file_path'])
         send_audio = await message.answer_audio(audio=FSInputFile(str(file_path)), caption=description)
         db.update_value(
@@ -316,9 +334,9 @@ async def good_news_handler(message: Message):
         good_news = random.choice(data)['news']
     else:
         good_news = ('ru: Еще никто не делился хорошими новостями. Поделись первым!\n'
-                     '<pre>пиши_боту: моя хорошая новость: <текст></pre>\n\n'
+                     '<pre>пиши_боту: моя хорошая новость: [ваш текст]</pre>\n\n'
                      'en: No one has shared good news yet. Be the first to share!\n'
-                     '<pre>write_to_bot: my good news: <text></pre>')
+                     '<pre>write_to_bot: my good news: [your text]</pre>')
     await message.answer(good_news, parse_mode='HTML')
 
 
