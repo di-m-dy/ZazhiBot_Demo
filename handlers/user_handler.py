@@ -333,10 +333,10 @@ async def good_news_handler(message: Message):
     if data:
         good_news = random.choice(data)['news']
     else:
-        good_news = ('ru: Еще никто не делился хорошими новостями. Поделись первым!\n'
-                     '<pre>пиши_боту: моя хорошая новость: [ваш текст]</pre>\n\n'
-                     'en: No one has shared good news yet. Be the first to share!\n'
-                     '<pre>write_to_bot: my good news: [your text]</pre>')
+        good_news = ('ru: Еще никто не делился хорошими новостями. Поделись первым! Пиши_боту:\n'
+                     '<pre>Моя хорошая новость: [ваш текст]</pre>\n\n'
+                     'en: No one has shared good news yet. Be the first to share! Write_to_bot:\n'
+                     '<pre>My good news: [your text]</pre>')
     await message.answer(good_news, parse_mode='HTML')
 
 
@@ -355,10 +355,10 @@ async def set_good_news_handler(message: Message):
                              '\n\nen: Thank you for sharing the good news!')
     else:
         await message.answer(
-            'ru: Пожалуйста, введите хорошую новость в формате'
-            '<pre>пиши_боту: моя хорошая новость: [ваш текст]</pre>'
-            'en: Please, enter the good news in the format'
-            '<pre>write_to_bot: my good news: [your text]</pre>',
+            'ru: Пожалуйста, введите хорошую новость в формате:\n'
+            '<pre>Моя хорошая новость: [ваш текст]</pre>'
+            'en: Please, enter the good news in the format:\n'
+            '<pre>My good news: [your text]</pre>',
             parse_mode='HTML'
         )
 
@@ -384,10 +384,10 @@ async def set_message_handler(message: Message):
         await message.answer('ru: Спасибо, что оставил сообщение!\n\nen: Thank you for leaving a message!')
     else:
         await message.answer(
-            'ru: Пожалуйста, введите сообщение в формате'
-            '<pre>пиши_боту: мое послание: [ваш текст]</pre>\n\n'
-            'en: Please, enter the message in the format'
-            '<pre>write_to_bot: my message: [your text]</pre>',
+            'ru: Пожалуйста, введите сообщение в формате:\n'
+            '<pre>Мое послание: [ваш текст]</pre>\n\n'
+            'en: Please, enter the message in the format:\n'
+            '<pre>My message: [your text]</pre>',
             parse_mode='HTML'
         )
 
