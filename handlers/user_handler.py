@@ -292,13 +292,13 @@ async def peter_pan_handler(message: Message):
     en: Peter Pan message
     ru: Сообщение о Питере Пэне
     """
-    data = db.get_data_from_db(config.PITER_TABLE)
-    if not data:
+    piter_data = db.get_data_from_db(config.PITER_TABLE)
+    if not piter_data:
         # en: If the database is empty, send a message
         # ru: Если база данных пуста, отправить сообщение
         await message.answer(bot_messages.EMPTY_DB)
         return
-    random_data = random.choice(data)
+    random_data = random.choice(piter_data)
     description = random_data['description']
 
     # en: Try to send the audio by file_id
@@ -311,7 +311,7 @@ async def peter_pan_handler(message: Message):
     except Exception as e:
         # en: Send a message to the admin about the error
         # ru: Отправить сообщение администратору об ошибке
-        await message.bot.send_message(config.ADMIN_ID, f'Error with «{random_data["answer_img"]}»:\n{e}')
+        await message.bot.send_message(config.ADMIN_ID, f'Error with «{random_data["file_path"]}»:\n{e}')
         file_path = os.path.join(config.PROJECT_PATH, random_data['file_path'])
         send_audio = await message.answer_audio(audio=FSInputFile(str(file_path)), caption=description)
         db.update_value(
